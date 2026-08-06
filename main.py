@@ -1,10 +1,16 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from typing import Optional 
+
 app = FastAPI()
 
 class AddTask(BaseModel):
     title : str
+
+class UpdateTask(BaseModel):
+    title: Optional[str] = None
+    done: Optional[bool] = None
 
 tasks = [
     {
@@ -92,3 +98,48 @@ def post_task(task_data : AddTask):
 
 #git add .
 #git commit -m "Stage 3: create with validation"
+
+@app.put('/tasks/{id}')
+def put_task(id:int, task_data: UpdateTask):
+    target = None    
+    for t in tasks:
+        if t['id'] == id:
+            target = t
+            break
+
+    if not target:
+        return JSONResponse(
+            status_code = 404,
+            content = {"error": "Unknown ID"}
+        )
+    
+    if task_data.title is None and task_data.done is None:        
+        return JSONResponse(
+            status_code = 400,
+            content = {"error": "Empty/Invalid Body"}
+        )
+
+    if task_data.title is not None:
+        if not task_data.title.strip():
+            return JSONResponse(
+                status_code = 400,
+                content = {"error": "Title cannot be empty if passed"}
+            )
+        target["title"] = task_data.title.strip()
+
+    if task_data.done is not None:
+        target["done"] = task_data.done
+    return target
+
+@app.delete("/tasks/{id}", status_code=204)
+def delete_task(id: int):
+    for i, task in enumerate(tasks):
+        if task['id'] == id:
+            del tasks[i]
+            return Response(status_code=204)
+    return JSONResponse(status_code=404, content={'error': 'Invalid ID'})
+
+    # git add .
+    # git commit -m "Stage 4: full CRUD"
+
+
