@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 app = FastAPI()
+
+class AddTask(BaseModel):
+    title : str
 
 tasks = [
     {
@@ -59,6 +63,32 @@ def task_with_id(id: int):
         status_code = 404,
         content = {"error": f"Task {id} not found"}
     )
-
 # git add .
 # git commit -m "Stage 2: read endpoints with 404"
+
+@app.post('/tasks', status_code = 201)
+def post_task(task_data : AddTask):
+    if not task_data.title:
+        return JSONResponse(
+            status_code = 400,
+            content = {"error": "Title is required"}
+        )
+    if not task_data.title.strip():
+        return JSONResponse(
+            status_code = 400,
+            content = {"error": "Title is empty"}
+        )
+
+    next_id = max([t["id"] for t in tasks], default = 0) + 1
+
+    new_task = {
+        "id": next_id,
+        "title": task_data.title.strip(),
+        "done": False
+    }
+
+    tasks.append(new_task)
+    return new_task
+
+#git add .
+#git commit -m "Stage 3: create with validation"
