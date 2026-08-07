@@ -3,7 +3,11 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional 
 
-app = FastAPI()
+app = FastAPI(
+    title = "Task Management CRUD API",
+    description= "A simple CRUD API tool to manage tasks",
+    version= "1.0"
+)
 
 class AddTask(BaseModel):
     title : str
@@ -39,6 +43,7 @@ tasks = [
 
 @app.get("/")
 def api_description():
+    """Retrieve API metadata and available endpoints"""
     return{
         "name": "Task API",
         "version": "1.0",
@@ -47,6 +52,7 @@ def api_description():
 
 @app.get('/health')
 def health_description():
+    """Retrieve the API status"""
     return{
         "status": "ok" 
     }
@@ -57,10 +63,12 @@ def health_description():
 
 @app.get('/tasks')
 def return_tasks():
+    """Retrieve API tasks"""
     return tasks
 
 @app.get('/tasks/{id}')
 def task_with_id(id: int):
+    """Retrieve API task based on a given ID"""
     for task in tasks:
         if task["id"] == id:
             return task
@@ -74,6 +82,7 @@ def task_with_id(id: int):
 
 @app.post('/tasks', status_code = 201)
 def post_task(task_data : AddTask):
+    """Insert a new task in the list of tasks"""
     if not task_data.title:
         return JSONResponse(
             status_code = 400,
@@ -101,6 +110,7 @@ def post_task(task_data : AddTask):
 
 @app.put('/tasks/{id}')
 def put_task(id:int, task_data: UpdateTask):
+    """Update a task with the requested ID"""
     target = None    
     for t in tasks:
         if t['id'] == id:
@@ -133,6 +143,7 @@ def put_task(id:int, task_data: UpdateTask):
 
 @app.delete("/tasks/{id}", status_code=204)
 def delete_task(id: int):
+    """Delete a task with the requested ID"""
     for i, task in enumerate(tasks):
         if task['id'] == id:
             del tasks[i]
@@ -141,5 +152,9 @@ def delete_task(id: int):
 
     # git add .
     # git commit -m "Stage 4: full CRUD"
+
+    #git add .
+    #git commit -m "Stage 5: Swagger UI"
+    #git push
 
 
