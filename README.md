@@ -112,5 +112,5 @@ curl -X PUT "http://localhost:8000/tasks/4" \
 
 ## 📸 Swagger UI
 
-A screenshot of the Swagger UI output:
+A screenshot of the Swagger UI output: 
 
