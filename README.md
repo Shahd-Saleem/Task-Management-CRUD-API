@@ -33,7 +33,7 @@ An in-memory **Task Management CRUD API** built with **Python**, **FastAPI**, an
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/Shahd-Saleem/Task-Management-CRUD-API.git
 cd Task-Management-CRUD-API
 ```
 
@@ -79,6 +79,17 @@ http://localhost:8000/docs
 
 ---
 
+## Table of Endpoints
+| **Method** | **Endpoint** | **Description** | **Expected Status Code** |
+|---|---|---|---|
+| **GET** | `/` | Retrieve API metadata and list of available routes | `200 OK` |
+| **GET** | `/health` | Check operational status of the service | `200 OK` |
+| **GET** | `/tasks` | Retrieve all stored tasks | `200 OK` |
+| **GET** | `/tasks/{id}` | Fetch details of a single task by ID | `200 OK` / `404 Not Found` |
+| **POST** | `/tasks` | Create a new task with validation | `201 Created` / `400 Bad Request` |
+| **PUT** | `/tasks/{id}` | Update task title, completed status (`done`), or both | `200 OK` / `400 Bad Request` / `404 Not Found` |
+| **DELETE** | `/tasks/{id}` | Remove a task from memory by ID | `204 No Content` / `404 Not Found` |
+
 ## 🧪 Example API Request
 
 ### Update a Task
@@ -112,5 +123,9 @@ curl -X PUT "http://localhost:8000/tasks/4" \
 
 ## 📸 Swagger UI
 
-A screenshot of the Swagger UI output: 
+A screenshot of the Swagger UI page:
+![Swagger UI Page](./swagger_ui.png)
 
+An example of a CRUD request working:
+![PUT Task Endpoint Request](./put_task_test.png)
+![PUT Task Endpoint Output](./put_task_output.png)
