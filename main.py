@@ -168,47 +168,73 @@ def post_task(task_data: AddTask):
 #git add .
 #git commit -m "Stage 3: create with validation"
 
-# @app.put('/tasks/{id}')
-# def put_task(id:int, task_data: UpdateTask):
-#     """Update a task with the requested ID"""
-#     target = None    
-#     for t in tasks:
-#         if t['id'] == id:
-#             target = t
-#             break
+@app.put('/tasks/{id}')
+def put_task(id: int, task_data: UpdateTask):
+    """Update a task in the SQLite database"""
+    cursor = conn.cursor()
 
-#     if not target:
-#         return JSONResponse(
-#             status_code = 404,
-#             content = {"error": "Unknown ID"}
-#         )
-    
-#     if task_data.title is None and task_data.done is None:        
-#         return JSONResponse(
-#             status_code = 400,
-#             content = {"error": "Empty/Invalid Body"}
-#         )
+    cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
+    task = cursor.fetchone()
 
-#     if task_data.title is not None:
-#         if not task_data.title.strip():
-#             return JSONResponse(
-#                 status_code = 400,
-#                 content = {"error": "Title cannot be empty if passed"}
-#             )
-#         target["title"] = task_data.title.strip()
+    if not task:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Unknown ID"}
+        )
 
-#     if task_data.done is not None:
-#         target["done"] = task_data.done
-#     return target
+    if task_data.title is None and task_data.done is None:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Empty/Invalid Body"}
+        )
 
-# @app.delete("/tasks/{id}", status_code=204)
-# def delete_task(id: int):
-#     """Delete a task with the requested ID"""
-#     for i, task in enumerate(tasks):
-#         if task['id'] == id:
-#             del tasks[i]
-#             return Response(status_code=204)
-#     return JSONResponse(status_code=404, content={'error': 'Invalid ID'})
+    new_title = task['title']
+    if task_data.title is not None:
+        if not task_data.title.strip():
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Title cannot be empty if passed"}
+            )
+        new_title = task_data.title.strip()
+
+    new_done = task['done']
+    if task_data.done is not None:
+        if task_data.done:
+            new_done = 1
+        else:
+            new_done = 0
+
+    cursor.execute(
+        "UPDATE Tasks SET title = ?, done = ? WHERE id = ?",
+        (new_title, new_done, id)
+    )
+    conn.commit()
+
+    return {
+        "id": id,
+        "title": new_title,
+        "done": bool(new_done)
+    }
+
+@app.delete("/tasks/{id}", status_code=204)
+def delete_task(id: int):
+    """Delete a task from the SQLite database"""
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
+    task = cursor.fetchone()
+
+    if not task:
+        return JSONResponse(
+            status_code=404,
+            content={'error': 'Invalid ID'}
+        )
+
+    cursor.execute("DELETE FROM Tasks WHERE id = ?", (id,))
+    conn.commit()
+
+    return Response(status_code=204)
+
 
     # git add .
     # git commit -m "Stage 4: full CRUD"
