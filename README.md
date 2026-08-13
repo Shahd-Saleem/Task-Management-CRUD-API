@@ -1,6 +1,6 @@
 # 📝 Task Management CRUD API
 
-An database-backed **Task Management CRUD API** built with **Python**, **FastAPI**, and **Pydantic** as part of the **FlyRank Internship**. The project provides full CRUD functionality, input validation, SQLite database storage, and interactive API documentation through Swagger UI.
+A database-backed **Task Management CRUD API** built with **Python**, **FastAPI**, and **Pydantic** as part of the **FlyRank Internship**. The project provides full CRUD functionality, input validation, SQLite database storage, and interactive API documentation through Swagger UI.
 
 ---
 
