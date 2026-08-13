@@ -129,3 +129,12 @@ A screenshot of the Swagger UI page:
 An example of a CRUD request working:
 ![PUT Task Endpoint Request](./put_task_test.png)
 ![PUT Task Endpoint Output](./put_task_output.png)
+
+## DB Browser for SQLite View
+SQL Query: 
+UPDATE tasks SET done = 1; 
+
+Before Changes:
+
+
+After Changes:
