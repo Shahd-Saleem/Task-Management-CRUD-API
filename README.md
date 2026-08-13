@@ -132,7 +132,12 @@ An example of a CRUD request working:
 
 ## DB Browser for SQLite View
 SQL Query: 
-UPDATE tasks SET done = 1; 
+```sql
+UPDATE tasks SET done = 1;
+
+The `UPDATE` statement is used to modify existing records in a database table.
+In this example, the `done` value is updated to `1`, marking all tasks as completed.
+
 
 Before SQL Changes:
 ![Before SQL Changes](./before_SQL_changes.png)
