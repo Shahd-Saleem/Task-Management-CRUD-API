@@ -42,6 +42,7 @@ app = FastAPI(
 
 class AddTask(BaseModel):
     title : str
+    done : Optional[bool] = False
 
 class UpdateTask(BaseModel):
     title: Optional[str] = None
@@ -136,30 +137,33 @@ def task_with_id(id: int):
 # git add .
 # git commit -m "Stage 2: read endpoints with 404"
 
-# @app.post('/tasks', status_code = 201)
-# def post_task(task_data : AddTask):
-#     """Insert a new task in the list of tasks"""
-#     if not task_data.title:
-#         return JSONResponse(
-#             status_code = 400,
-#             content = {"error": "Title is required"}
-#         )
-#     if not task_data.title.strip():
-#         return JSONResponse(
-#             status_code = 400,
-#             content = {"error": "Title is empty"}
-#         )
+@app.post("/tasks", status_code=201)
+def post_task(task_data: AddTask):
+    """Insert a new task into SQLite database"""
 
-#     next_id = max([t["id"] for t in tasks], default = 0) + 1
+    if not task_data.title or not task_data.title.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Title is required and cannot be empty"}
+        )
 
-#     new_task = {
-#         "id": next_id,
-#         "title": task_data.title.strip(),
-#         "done": False
-#     }
+    clean_title = task_data.title.strip()
+    cursor = conn.cursor()
 
-#     tasks.append(new_task)
-#     return new_task
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (clean_title, task_data.done)
+    )
+    conn.commit()
+
+    new_id = cursor.lastrowid
+
+    return {
+        "id": new_id,
+        "title": clean_title,
+        "done": task_data.done
+    }
+
 
 #git add .
 #git commit -m "Stage 3: create with validation"
