@@ -134,6 +134,7 @@ An example of a CRUD request working:
 SQL Query: 
 ```sql
 UPDATE tasks SET done = 1;
+```
 
 The `UPDATE` statement is used to modify existing records in a database table.
 In this example, the `done` value is updated to `1`, marking all tasks as completed.
