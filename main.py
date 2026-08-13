@@ -2,6 +2,37 @@ from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional 
+import sqlite3
+
+conn = sqlite3.connect("tasks.db")
+conn.row_factory = sqlite3.Row
+
+def init_db():
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS Tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        title TEXT NOT NULL, 
+        done boolean NOT NULL DEFAULT 0
+        )
+        """
+        
+    )
+    conn.commit()
+    cursor.execute("SELECT COUNT (*) FROM TASKS")
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        tasks_list = [
+            ('Cook a meal', 0),
+            ('Study for exam', 1),
+            ('Watch a movie', 1)
+        ]
+        cursor.executemany("INSERT INTO Tasks (title, done) values (?, ?)", tasks_list)
+        conn.commit()
+
+init_db()
 
 app = FastAPI(
     title = "Task Management CRUD API",
@@ -16,25 +47,27 @@ class UpdateTask(BaseModel):
     title: Optional[str] = None
     done: Optional[bool] = None
 
-tasks = [
-    {
-        "id": 1,
-        "title": "Inserting in a database",
-        "done": False
-    },
 
-    {
-        "id": 2,
-        "title": "defining a function",
-        "done": True
-    },
+#tasks = [
+#    {
+#        "id": 1,
+#        "title": "Inserting in a database",
+#        "done": False
+#    },
+#
+#    {
+#        "id": 2,
+#        "title": "defining a function",
+#        "done": True
+#    },
+#
+#    {
+#        "id": 3,
+#        "title": "printing a result",
+#        "done": True
+#    }
+#]
 
-    {
-        "id": 3,
-        "title": "printing a result",
-        "done": True
-    }
-]
 
 #@app.get('/')
 #def hello_world():
