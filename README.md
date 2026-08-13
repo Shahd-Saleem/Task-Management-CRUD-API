@@ -140,9 +140,14 @@ The `UPDATE` statement is used to modify existing records in a database table.
 In this example, the `done` value is updated to `1`, marking all tasks as completed.
 
 
-Before SQL Changes:
-![Before SQL Changes](./before_SQL_changes.png)
+### Before SQL Changes
 
+<p align="center">
+  <img src="./before_SQL_changes.png" alt="Before SQL Changes" width="600">
+</p>
 
-After SQL Changes:
-![After SQL Changes](./after_SQL_changes.png)
+### After SQL Changes
+
+<p align="center">
+  <img src="./after_SQL_changes.png" alt="After SQL Changes" width="600">
+</p>
