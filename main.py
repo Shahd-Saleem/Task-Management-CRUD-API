@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional 
 import sqlite3
 
-conn = sqlite3.connect("tasks.db")
+conn = sqlite3.connect("tasks.db", check_same_thread=False)
 conn.row_factory = sqlite3.Row
 
 def init_db():
@@ -96,92 +96,115 @@ def health_description():
 
 @app.get('/tasks')
 def return_tasks():
-    """Retrieve API tasks"""
-    return tasks
+    """Retrieve API tasks from SQLite database"""
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Tasks')
+    tasks = cursor.fetchall()
+
+    new_list =[]
+    for task in tasks:
+        new_list.append(
+            {
+                'id': task['id'],
+                'title' : task['title'],
+                'done' : bool(task['done'])
+            }
+        )
+    return new_list
+
+
+    
 
 @app.get('/tasks/{id}')
 def task_with_id(id: int):
-    """Retrieve API task based on a given ID"""
-    for task in tasks:
-        if task["id"] == id:
-            return task
-        
-    return JSONResponse(
-        status_code = 404,
-        content = {"error": f"Task {id} not found"}
-    )
+    """Retrieve API task based on a given ID from SQLite database"""
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (id,))
+    task = cursor.fetchone()
+
+    if not task:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {id} not found"}
+        )
+
+    return {
+        'id': task['id'],
+        'title': task['title'],
+        'done': bool(task['done'])
+    }
 # git add .
 # git commit -m "Stage 2: read endpoints with 404"
 
-@app.post('/tasks', status_code = 201)
-def post_task(task_data : AddTask):
-    """Insert a new task in the list of tasks"""
-    if not task_data.title:
-        return JSONResponse(
-            status_code = 400,
-            content = {"error": "Title is required"}
-        )
-    if not task_data.title.strip():
-        return JSONResponse(
-            status_code = 400,
-            content = {"error": "Title is empty"}
-        )
+# @app.post('/tasks', status_code = 201)
+# def post_task(task_data : AddTask):
+#     """Insert a new task in the list of tasks"""
+#     if not task_data.title:
+#         return JSONResponse(
+#             status_code = 400,
+#             content = {"error": "Title is required"}
+#         )
+#     if not task_data.title.strip():
+#         return JSONResponse(
+#             status_code = 400,
+#             content = {"error": "Title is empty"}
+#         )
 
-    next_id = max([t["id"] for t in tasks], default = 0) + 1
+#     next_id = max([t["id"] for t in tasks], default = 0) + 1
 
-    new_task = {
-        "id": next_id,
-        "title": task_data.title.strip(),
-        "done": False
-    }
+#     new_task = {
+#         "id": next_id,
+#         "title": task_data.title.strip(),
+#         "done": False
+#     }
 
-    tasks.append(new_task)
-    return new_task
+#     tasks.append(new_task)
+#     return new_task
 
 #git add .
 #git commit -m "Stage 3: create with validation"
 
-@app.put('/tasks/{id}')
-def put_task(id:int, task_data: UpdateTask):
-    """Update a task with the requested ID"""
-    target = None    
-    for t in tasks:
-        if t['id'] == id:
-            target = t
-            break
+# @app.put('/tasks/{id}')
+# def put_task(id:int, task_data: UpdateTask):
+#     """Update a task with the requested ID"""
+#     target = None    
+#     for t in tasks:
+#         if t['id'] == id:
+#             target = t
+#             break
 
-    if not target:
-        return JSONResponse(
-            status_code = 404,
-            content = {"error": "Unknown ID"}
-        )
+#     if not target:
+#         return JSONResponse(
+#             status_code = 404,
+#             content = {"error": "Unknown ID"}
+#         )
     
-    if task_data.title is None and task_data.done is None:        
-        return JSONResponse(
-            status_code = 400,
-            content = {"error": "Empty/Invalid Body"}
-        )
+#     if task_data.title is None and task_data.done is None:        
+#         return JSONResponse(
+#             status_code = 400,
+#             content = {"error": "Empty/Invalid Body"}
+#         )
 
-    if task_data.title is not None:
-        if not task_data.title.strip():
-            return JSONResponse(
-                status_code = 400,
-                content = {"error": "Title cannot be empty if passed"}
-            )
-        target["title"] = task_data.title.strip()
+#     if task_data.title is not None:
+#         if not task_data.title.strip():
+#             return JSONResponse(
+#                 status_code = 400,
+#                 content = {"error": "Title cannot be empty if passed"}
+#             )
+#         target["title"] = task_data.title.strip()
 
-    if task_data.done is not None:
-        target["done"] = task_data.done
-    return target
+#     if task_data.done is not None:
+#         target["done"] = task_data.done
+#     return target
 
-@app.delete("/tasks/{id}", status_code=204)
-def delete_task(id: int):
-    """Delete a task with the requested ID"""
-    for i, task in enumerate(tasks):
-        if task['id'] == id:
-            del tasks[i]
-            return Response(status_code=204)
-    return JSONResponse(status_code=404, content={'error': 'Invalid ID'})
+# @app.delete("/tasks/{id}", status_code=204)
+# def delete_task(id: int):
+#     """Delete a task with the requested ID"""
+#     for i, task in enumerate(tasks):
+#         if task['id'] == id:
+#             del tasks[i]
+#             return Response(status_code=204)
+#     return JSONResponse(status_code=404, content={'error': 'Invalid ID'})
 
     # git add .
     # git commit -m "Stage 4: full CRUD"
