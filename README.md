@@ -134,7 +134,9 @@ An example of a CRUD request working:
 SQL Query: 
 UPDATE tasks SET done = 1; 
 
-Before Changes:
+Before SQL Changes:
+![Before SQL Changes](./before_SQL_changes.png)
 
 
-After Changes:
+After SQL Changes:
+![After SQL Changes](./after_SQL_changes.png)
