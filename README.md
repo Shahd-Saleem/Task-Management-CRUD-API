@@ -1,6 +1,6 @@
 # 📝 Task Management CRUD API
 
-An in-memory **Task Management CRUD API** built with **Python**, **FastAPI**, and **Pydantic** as part of the **FlyRank Internship**. The project provides full CRUD functionality, input validation, dynamic in-memory storage, and interactive API documentation through Swagger UI.
+An database-backed **Task Management CRUD API** built with **Python**, **FastAPI**, and **Pydantic** as part of the **FlyRank Internship**. The project provides full CRUD functionality, input validation, SQLite database storage, and interactive API documentation through Swagger UI.
 
 ---
 
@@ -21,6 +21,7 @@ An in-memory **Task Management CRUD API** built with **Python**, **FastAPI**, an
 - FastAPI
 - Pydantic
 - Uvicorn
+- SQLite3
 
 ---
 
@@ -84,11 +85,11 @@ http://localhost:8000/docs
 |---|---|---|---|
 | **GET** | `/` | Retrieve API metadata and list of available routes | `200 OK` |
 | **GET** | `/health` | Check operational status of the service | `200 OK` |
-| **GET** | `/tasks` | Retrieve all stored tasks | `200 OK` |
-| **GET** | `/tasks/{id}` | Fetch details of a single task by ID | `200 OK` / `404 Not Found` |
-| **POST** | `/tasks` | Create a new task with validation | `201 Created` / `400 Bad Request` |
-| **PUT** | `/tasks/{id}` | Update task title, completed status (`done`), or both | `200 OK` / `400 Bad Request` / `404 Not Found` |
-| **DELETE** | `/tasks/{id}` | Remove a task from memory by ID | `204 No Content` / `404 Not Found` |
+| **GET** | `/tasks` | Retrieve all stored tasks from database | `200 OK` |
+| **GET** | `/tasks/{id}` | Fetch details of a single task by ID from database | `200 OK` / `404 Not Found` |
+| **POST** | `/tasks` | Create a new task with validation in the database | `201 Created` / `400 Bad Request` |
+| **PUT** | `/tasks/{id}` | Update task title, completed status (`done`), or both in the database| `200 OK` / `400 Bad Request` / `404 Not Found` |
+| **DELETE** | `/tasks/{id}` | Remove a task from memory by ID in database | `204 No Content` / `404 Not Found` |
 
 ## 🧪 Example API Request
 
@@ -129,6 +130,23 @@ A screenshot of the Swagger UI page:
 An example of a CRUD request working:
 ![PUT Task Endpoint Request](./put_task_test.png)
 ![PUT Task Endpoint Output](./put_task_output.png)
+
+## Database Architecture & Setup
+
+### Why SQLite?
+SQLite was chosen for this project because:
+* **Zero Configuration:** It requires no separate server process, installation, or complex setup.
+* **Single File Storage:** The entire database resides in a lightweight, single file (`tasks.db`).
+* **Persistence:** Unlike in-memory data, your tasks and updates survive server restarts and shutdowns.
+
+---
+
+### Database File Management
+* **Location:** The database file is located at the root of the project (`tasks.db`).
+* **Automatic Creation:** It is created automatically by the app during startup if it doesn't already exist.
+* **Git Ignored:** `tasks.db` is included in `.gitignore` so that runtime database changes aren't tracked in version control, allowing each cloned environment to start with a fresh database setup.
+
+---
 
 ## DB Browser for SQLite View
 SQL Query: 
