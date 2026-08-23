@@ -170,10 +170,16 @@ In this example, the `done` value is updated to `1`, marking all tasks as comple
   <img src="./after_SQL_changes.png" alt="After SQL Changes" width="600">
 </p>
 
-## Database Setup (Stage 0)
+### Database Setup (Using Docker)
 
-Run the following command to start the PostgreSQL container:
+Run the following command to start the local PostgreSQL container:
 
-```powershell
-docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql -d postgres
-```
+```bash
+docker run --name taskdb \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=<YOUR_LOCAL_PASSWORD> \
+  -e POSTGRES_DB=tasks \
+  -p 5432:5432 \
+  -v taskdata:/var/lib/postgresql/data \
+  -d postgres
+  ```
