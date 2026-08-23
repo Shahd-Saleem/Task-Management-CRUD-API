@@ -1,48 +1,25 @@
+import os
+import psycopg
+from dotenv import load_dotenv
 from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional 
-import sqlite3
 
-conn = sqlite3.connect("tasks.db", check_same_thread=False)
-conn.row_factory = sqlite3.Row
-
-def init_db():
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS Tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        title TEXT NOT NULL, 
-        done boolean NOT NULL DEFAULT 0
-        )
-        """
-        
-    )
-    conn.commit()
-    cursor.execute("SELECT COUNT (*) FROM TASKS")
-    count = cursor.fetchone()[0]
-
-    if count == 0:
-        tasks_list = [
-            ('Cook a meal', 0),
-            ('Study for exam', 1),
-            ('Watch a movie', 1)
-        ]
-        cursor.executemany("INSERT INTO Tasks (title, done) values (?, ?)", tasks_list)
-        conn.commit()
-
-init_db()
+load_dotenv()
 
 app = FastAPI(
-    title = "Task Management CRUD API",
-    description= "A simple CRUD API tool to manage tasks",
-    version= "1.0"
+    title="Task Management CRUD API",
+    description="A simple CRUD API tool to manage tasks",
+    version="1.0"
 )
 
+def get_db_connection():
+    return psycopg.connect(os.getenv("DATABASE_URL"))
+
 class AddTask(BaseModel):
-    title : str
-    done : Optional[bool] = False
+    title: str
+    done: Optional[bool] = False
 
 class UpdateTask(BaseModel):
     title: Optional[str] = None
@@ -97,45 +74,40 @@ def health_description():
 
 @app.get('/tasks')
 def return_tasks():
-    """Retrieve API tasks from SQLite database"""
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Tasks')
-    tasks = cursor.fetchall()
-
-    new_list =[]
-    for task in tasks:
-        new_list.append(
-            {
-                'id': task['id'],
-                'title' : task['title'],
-                'done' : bool(task['done'])
-            }
-        )
-    return new_list
-
-
-    
+    """Retrieve API tasks from PostgreSQL database"""
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, title, done FROM tasks ORDER BY id ASC;")
+            rows = cur.fetchall()
+            
+            return [
+                {
+                    "id": row[0],
+                    "title": row[1],
+                    "done": bool(row[2])
+                }
+                for row in rows
+            ]
 
 @app.get('/tasks/{id}')
 def task_with_id(id: int):
-    """Retrieve API task based on a given ID from SQLite database"""
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM Tasks WHERE id = ?', (id,))
-    task = cursor.fetchone()
+    """Retrieve API task based on a given ID from PostgreSQL database"""
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, title, done FROM tasks WHERE id = %s;", (id,))
+            task = cur.fetchone()
 
-    if not task:
-        return JSONResponse(
-            status_code=404,
-            content={"error": f"Task {id} not found"}
-        )
+            if not task:
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": "Task not found"}
+                )
 
-    return {
-        'id': task['id'],
-        'title': task['title'],
-        'done': bool(task['done'])
-    }
-# git add .
-# git commit -m "Stage 2: read endpoints with 404"
+            return {
+                "id": task[0],
+                "title": task[1],
+                "done": bool(task[2])
+            }
 
 @app.post("/tasks", status_code=201)
 def post_task(task_data: AddTask):
