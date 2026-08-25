@@ -133,10 +133,10 @@ This project uses **PostgreSQL** running inside a dedicated Docker container man
 
 **Initial Seeded Tasks (`GET /tasks`):**
 <p align="center">
-  <img src="images/before_SQL_changes.png" alt="GET /tasks initial state" width="600">
+  <img src="images/db_before_changes.png" alt="GET /tasks initial database" width="600">
 </p>
 
 **After Adding a New Task using `POST /tasks`:**
 <p align="center">
-  <img src="images/after_SQL_changes.png" alt="GET /tasks updated state" width="600">
+  <img src="images/db_after_changes.png" alt="GET /tasks updated database" width="600">
 </p>
