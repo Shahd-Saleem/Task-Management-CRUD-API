@@ -136,7 +136,7 @@ This project uses **PostgreSQL** running inside a dedicated Docker container man
   <img src="images/db_before_changes.png" alt="GET /tasks initial database" width="600">
 </p>
 
-**After Adding a New Task using `POST /tasks`:**
+**After Adding a New Task Using `POST /tasks`:**
 <p align="center">
   <img src="images/db_after_changes.png" alt="GET /tasks updated database" width="600">
 </p>
