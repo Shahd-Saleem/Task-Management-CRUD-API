@@ -129,15 +129,14 @@ This project uses **PostgreSQL** running inside a dedicated Docker container man
 ### Swagger UI Documentation
 ![Swagger UI Page](images/swagger_ui.png)
 
-### Endpoint Execution
-![PUT Task Endpoint Request](images/put_task_test.png)
-![PUT Task Endpoint Output](images/put_task_output.png)
+### Postgres Database View
 
-### PostgreSQL Database View
+**Initial Seeded Tasks (`GET /tasks`):**
 <p align="center">
-  <img src="images/before_SQL_changes.png" alt="PostgreSQL Database View Before Changes" width="600">
+  <img src="images/before_SQL_changes.png" alt="GET /tasks initial state" width="600">
 </p>
 
+**After Adding a New Task using `POST /tasks`:**
 <p align="center">
-  <img src="images/after_SQL_changes.png" alt="PostgreSQL Database View After Changes" width="600">
+  <img src="images/after_SQL_changes.png" alt="GET /tasks updated state" width="600">
 </p>
