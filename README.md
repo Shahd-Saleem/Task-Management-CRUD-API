@@ -125,11 +125,11 @@ curl -X PUT "http://localhost:8000/tasks/4" \
 ## 📸 Swagger UI
 
 A screenshot of the Swagger UI page:
-![Swagger UI Page](./swagger_ui.png)
+![Swagger UI Page](images/swagger_ui.png)
 
 An example of a CRUD request working:
-![PUT Task Endpoint Request](./put_task_test.png)
-![PUT Task Endpoint Output](./put_task_output.png)
+![PUT Task Endpoint Request](images/put_task_test.png)
+![PUT Task Endpoint Output](images/put_task_output.png)
 
 ## Database Architecture & Setup
 
@@ -161,13 +161,13 @@ In this example, the `done` value is updated to `1`, marking all tasks as comple
 ### Before SQL Changes
 
 <p align="center">
-  <img src="./before_SQL_changes.png" alt="Before SQL Changes" width="600">
+  <img src="images/before_SQL_changes.png" alt="Before SQL Changes" width="600">
 </p>
 
 ### After SQL Changes
 
 <p align="center">
-  <img src="./after_SQL_changes.png" alt="After SQL Changes" width="600">
+  <img src="images/after_SQL_changes.png" alt="After SQL Changes" width="600">
 </p>
 
 ### Database Setup (Using Docker)

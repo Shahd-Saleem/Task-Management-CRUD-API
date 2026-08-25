@@ -183,7 +183,7 @@ def delete_task(id: int):
             return Response(status_code=204)
 
         # Git Code Used:
-        # git add FileName
+        # git add FileName / .
         # git commit -m "COMMENT"
         # git push
 
