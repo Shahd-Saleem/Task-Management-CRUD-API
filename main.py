@@ -1,17 +1,27 @@
 import os
 import psycopg
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional 
 
+from database import init_db  # Import the initialization logic
+
 load_dotenv()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Automatically creates table and seeds initial tasks on startup
+    init_db()
+    yield
 
 app = FastAPI(
     title="Task Management CRUD API",
     description="A simple CRUD API tool to manage tasks",
-    version="1.0"
+    version="1.0",
+    lifespan=lifespan
 )
 
 def get_db_connection():
@@ -27,36 +37,10 @@ class UpdateTask(BaseModel):
     done: Optional[bool] = None
 
 
-#tasks = [
-#    {
-#        "id": 1,
-#        "title": "Inserting in a database",
-#        "done": False
-#    },
-#
-#    {
-#        "id": 2,
-#        "title": "defining a function",
-#        "done": True
-#    },
-#
-#    {
-#        "id": 3,
-#        "title": "printing a result",
-#        "done": True
-#    }
-#]
-
-
-#@app.get('/')
-#def hello_world():
-#    return {"message": 'Hello World'}
-# Stage 0 DONE
-
 @app.get("/")
 def api_description():
     """Retrieve API metadata and available endpoints"""
-    return{
+    return {
         "name": "Task API",
         "version": "1.0",
         "endpoints": ["/tasks"]
@@ -65,7 +49,7 @@ def api_description():
 @app.get('/health')
 def health_description():
     """Retrieve the API status"""
-    return{
+    return {
         "status": "ok" 
     }
 
@@ -198,9 +182,12 @@ def delete_task(id: int):
 
             return Response(status_code=204)
 
+        # Git Code Used:
+        # git add FileName
+        # git commit -m "COMMENT"
+        # git push
 
-    #git add main.py
-    #git commit -m "Stage 5: Swagger UI"
-    #git push
-
-
+        # For example:
+        # git add main.py
+        # git commit -m "Stage 3: Full CRUD on Postgres"
+        # git push
