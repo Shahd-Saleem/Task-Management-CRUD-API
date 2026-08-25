@@ -17,6 +17,7 @@ app = FastAPI(
 def get_db_connection():
     return psycopg.connect(os.getenv("DATABASE_URL"))
 
+
 class AddTask(BaseModel):
     title: str
     done: Optional[bool] = False
@@ -68,9 +69,6 @@ def health_description():
         "status": "ok" 
     }
 
-# git add .
-# git commit -m "Stage 1: root and health endpoints"
-# git push
 
 @app.get('/tasks')
 def return_tasks():
@@ -111,8 +109,7 @@ def task_with_id(id: int):
 
 @app.post("/tasks", status_code=201)
 def post_task(task_data: AddTask):
-    """Insert a new task into SQLite database"""
-
+    """Insert a new task into PostgreSQL database"""
     if not task_data.title or not task_data.title.strip():
         return JSONResponse(
             status_code=400,
@@ -120,98 +117,89 @@ def post_task(task_data: AddTask):
         )
 
     clean_title = task_data.title.strip()
-    cursor = conn.cursor()
+    
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING id, title, done;",
+                (clean_title, task_data.done)
+            )
+            row = cur.fetchone()
+            conn.commit()
 
-    cursor.execute(
-        "INSERT INTO tasks (title, done) VALUES (?, ?)",
-        (clean_title, task_data.done)
-    )
-    conn.commit()
+            return {
+                "id": row[0],
+                "title": row[1],
+                "done": bool(row[2])
+            }
 
-    new_id = cursor.lastrowid
-
-    return {
-        "id": new_id,
-        "title": clean_title,
-        "done": task_data.done
-    }
-
-
-#git add .
-#git commit -m "Stage 3: create with validation"
 
 @app.put('/tasks/{id}')
 def put_task(id: int, task_data: UpdateTask):
-    """Update a task in the SQLite database"""
-    cursor = conn.cursor()
+    """Update a task in the PostgreSQL database"""
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, title, done FROM tasks WHERE id = %s;", (id,))
+            task = cur.fetchone()
 
-    cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
-    task = cursor.fetchone()
+            if not task:
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": "Task not found"}
+                )
 
-    if not task:
-        return JSONResponse(
-            status_code=404,
-            content={"error": "Unknown ID"}
-        )
+            if task_data.title is None and task_data.done is None:
+                return JSONResponse(
+                    status_code=400,
+                    content={"error": "Empty/Invalid Body"}
+                )
 
-    if task_data.title is None and task_data.done is None:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Empty/Invalid Body"}
-        )
+            new_title = task[1]
+            if task_data.title is not None:
+                if not task_data.title.strip():
+                    return JSONResponse(
+                        status_code=400,
+                        content={"error": "Title cannot be empty if passed"}
+                    )
+                new_title = task_data.title.strip()
 
-    new_title = task['title']
-    if task_data.title is not None:
-        if not task_data.title.strip():
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Title cannot be empty if passed"}
+            new_done = task[2]
+            if task_data.done is not None:
+                new_done = task_data.done
+
+            cur.execute(
+                "UPDATE tasks SET title = %s, done = %s WHERE id = %s;",
+                (new_title, new_done, id)
             )
-        new_title = task_data.title.strip()
+            conn.commit()
 
-    new_done = task['done']
-    if task_data.done is not None:
-        if task_data.done:
-            new_done = 1
-        else:
-            new_done = 0
-
-    cursor.execute(
-        "UPDATE Tasks SET title = ?, done = ? WHERE id = ?",
-        (new_title, new_done, id)
-    )
-    conn.commit()
-
-    return {
-        "id": id,
-        "title": new_title,
-        "done": bool(new_done)
-    }
+            return {
+                "id": id,
+                "title": new_title,
+                "done": bool(new_done)
+            }
 
 @app.delete("/tasks/{id}", status_code=204)
 def delete_task(id: int):
-    """Delete a task from the SQLite database"""
-    cursor = conn.cursor()
+    """Delete a task from the PostgreSQL database"""
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id FROM tasks WHERE id = %s;", (id,))
+            task = cur.fetchone()
 
-    cursor.execute("SELECT * FROM Tasks WHERE id = ?", (id,))
-    task = cursor.fetchone()
+            if not task:
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": "Task not found"}
+                )
 
-    if not task:
-        return JSONResponse(
-            status_code=404,
-            content={'error': 'Invalid ID'}
-        )
+            cur.execute("DELETE FROM tasks WHERE id = %s;", (id,))
+            conn.commit()
 
-    cursor.execute("DELETE FROM Tasks WHERE id = ?", (id,))
-    conn.commit()
-
-    return Response(status_code=204)
+            return Response(status_code=204)
 
 
-    # git add .
-    # git commit -m "Stage 4: full CRUD"
-
-    #git add .
+    #git add main.py
     #git commit -m "Stage 5: Swagger UI"
     #git push
 
