@@ -1,31 +1,31 @@
-# 📝 Task Management CRUD API
+# Task Management CRUD API
 
-A database-backed **Task Management CRUD API** built with **Python**, **FastAPI**, and **Pydantic** as part of the **FlyRank Internship**. The project provides full CRUD functionality, input validation, SQLite database storage, and interactive API documentation through Swagger UI.
+A containerized **Task Management CRUD API** built with **Python**, **FastAPI**, **Pydantic**, and **PostgreSQL**, fully orchestrated using **Docker Compose** as part of the **FlyRank Internship**.
 
 ---
 
-## ✨ Features
+## Features
 
 -  Full CRUD operations (Create, Read, Update, Delete)
--  Input validation using Pydantic models
--  Clear validation error messages
--  Dynamic in-memory task storage
--  Interactive Swagger/OpenAPI documentation
--  Lightweight and easy to run locally
+-  Input validation using Pydantic models with dynamic error handling
+-  Persistent storage backed by PostgreSQL
+-  Containerized architecture with automatic DB initialization & retry logic
+-  Interactive OpenAPI / Swagger UI documentation
+-  One-command local startup via Docker Compose
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- Python 3.8+
-- FastAPI
+- Python 3.11+
+- FastAPI & Uvicorn
 - Pydantic
-- Uvicorn
-- SQLite3
+- PostgreSQL & psycopg
+- Docker & Docker Compose
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -35,50 +35,35 @@ A database-backed **Task Management CRUD API** built with **Python**, **FastAPI*
 
 ```bash
 git clone https://github.com/Shahd-Saleem/Task-Management-CRUD-API.git
-cd Task-Management-CRUD-API
 ```
 
-### 2. Create and Activate a Virtual Environment
+### 2. Set Up Environment Variables
 
-**Windows (PowerShell)**
-
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-**macOS / Linux**
+Copy the example environment file to create your active .env configuration:
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+cp .env.example .env
 ```
 
-### 3. Install Dependencies
+### 3. Start the Application Stack
+
+Run the single Docker Compose command to build and launch both the FastAPI application and PostgreSQL database containers:
 
 ```bash
-pip install fastapi uvicorn pydantic
-```
-
-### 4. Run the API
-
-```bash
-uvicorn main:app --reload
+docker compose up --build
 ```
 
 The server will start at:
 
-```
-http://localhost:8000
-```
+Base API: http://localhost:8000
 
-Interactive API documentation (Swagger UI page) is available at:
+Swagger UI Documentation: http://localhost:8000/docs
 
-```
-http://localhost:8000/docs
-```
+To stop the running services:
 
----
+```bash
+docker compose down
+```
 
 ## Table of Endpoints
 | **Method** | **Endpoint** | **Description** | **Expected Status Code** |
@@ -101,10 +86,12 @@ http://localhost:8000/docs
 PUT /tasks/{id}
 ```
 
-**Curl Testing**
+**'curl -i' Testing**
+
+### Update a Task
 
 ```bash
-curl -X PUT "http://localhost:8000/tasks/4" \
+curl -i -X PUT "http://localhost:8000/tasks/1" \
 -H "accept: application/json" \
 -H "Content-Type: application/json" \
 -d '{"done": true}'
@@ -112,74 +99,45 @@ curl -X PUT "http://localhost:8000/tasks/4" \
 
 **Output (Pasted Curl Output)**
 
-```json
+```bash
+HTTP/1.1 200 OK
+date: Tue, 25 Aug 2026 15:30:00 GMT
+server: uvicorn
+content-length: 33
+content-type: application/json
+
 {
-  "id": 4,
-  "title": "Test from Swagger",
+  "id": 1,
+  "title": "Task 1",
   "done": true
 }
 ```
 
 ---
 
-## 📸 Swagger UI
+## Database Architecture & Setup
 
-A screenshot of the Swagger UI page:
+This project uses **PostgreSQL** running inside a dedicated Docker container managed by Docker Compose.
+
+- **Persistence:** Database data is stored persistently using a named Docker volume (`postgres_data`).
+- **Auto-Initialization:** The API automatically checks connection status on startup via lifespan handlers and executes table creation and seeding logic automatically.
+
+---
+
+## Screenshots & Database Verification
+
+### Swagger UI Documentation
 ![Swagger UI Page](images/swagger_ui.png)
 
-An example of a CRUD request working:
+### Endpoint Execution
 ![PUT Task Endpoint Request](images/put_task_test.png)
 ![PUT Task Endpoint Output](images/put_task_output.png)
 
-## Database Architecture & Setup
-
-### Why SQLite?
-SQLite was chosen for this project because:
-* **Zero Configuration:** It requires no separate server process, installation, or complex setup.
-* **Single File Storage:** The entire database resides in a lightweight, single file (`tasks.db`).
-* **Persistence:** Unlike in-memory data, your tasks and updates survive server restarts and shutdowns.
-
----
-
-### Database File Management
-* **Location:** The database file is located at the root of the project (`tasks.db`).
-* **Automatic Creation:** It is created automatically by the app during startup if it doesn't already exist.
-* **Git Ignored:** `tasks.db` is included in `.gitignore` so that runtime database changes aren't tracked in version control, allowing each cloned environment to start with a fresh database setup.
-
----
-
-## DB Browser for SQLite View
-SQL Query: 
-```sql
-UPDATE tasks SET done = 1;
-```
-
-The `UPDATE` statement is used to modify existing records in a database table.
-In this example, the `done` value is updated to `1`, marking all tasks as completed.
-
-
-### Before SQL Changes
-
+### PostgreSQL Database View
 <p align="center">
-  <img src="images/before_SQL_changes.png" alt="Before SQL Changes" width="600">
+  <img src="images/before_SQL_changes.png" alt="PostgreSQL Database View Before Changes" width="600">
 </p>
 
-### After SQL Changes
-
 <p align="center">
-  <img src="images/after_SQL_changes.png" alt="After SQL Changes" width="600">
+  <img src="images/after_SQL_changes.png" alt="PostgreSQL Database View After Changes" width="600">
 </p>
-
-### Database Setup (Using Docker)
-
-Run the following command to start the local PostgreSQL container:
-
-```bash
-docker run --name taskdb \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=<YOUR_LOCAL_PASSWORD> \
-  -e POSTGRES_DB=tasks \
-  -p 5432:5432 \
-  -v taskdata:/var/lib/postgresql/data \
-  -d postgres
-  ```
